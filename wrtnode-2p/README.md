@@ -13,7 +13,7 @@ write 6
 read 7
 buf: 57 3c 01 01 01 00 00
 ```
-通知2P，CC2530已经开启60s入网模式
+Open CC2530 for connection in next 60s
 
 * Get online device list
 ```
