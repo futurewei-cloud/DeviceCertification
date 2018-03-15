@@ -110,11 +110,13 @@ buf: 57 3c 83 64 0d 38 01 ea d6 a6 16 00 4b 12 00 1c 00 1b 00
 ## Device accessing
 
 |Function|Pin|Memo|
+|---|---|---|
 |Motor|P1.1, P1.2||
 |DTH11|P1.5||
 |Alarm|P1.4|Active High|
 |Button|P0.0|Long press for reset|
 |Cover sensor|P2.0||
+
 For example, the data to set alarm on is `00 FF 10 EF 00 FF 00 FF` and to switch it off is `00 FF 00 FF 00 FF 00 FF`
 
 ## Tools
