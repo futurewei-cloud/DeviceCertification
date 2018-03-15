@@ -1,10 +1,24 @@
 # WRTNode-2P
 
+## Preparation
+### Download toochain to cross-compile the driver
+```
+wget https://downloads.lede-project.org/releases/17.01.4/targets/ramips/mt7628/lede-sdk-17.01.4-ramips-mt7628_gcc-5.4.0_musl-1.1.16.Linux-x86_64.tar.xz
+```
+
+### Compile
+```
+/home/qi/tools/lede-sdk-17.01.4-ramips-mt7628_gcc-5.4.0_musl-1.1.16.Linux-x86_64/staging_dir/toolchain-mipsel_24kc_gcc-5.4.0_musl-1.1.16/bin/mipsel-openwrt-linux-gcc send.c -o send
+```
+
+### Transfer the send tool to wrtnode-2P to communicate with device
+`scp send root@192.168.8.1:/bin/`
+
 ## Operation
-## setwifi
+### setwifi
 The command to set WIFI to connect to the router
 
-## Communicate with zigbee
+### Communicate with zigbee
 * Allow the connection
 ```
 root@LEDE:/bin# ./send 57 3E 01 01 00 00
@@ -23,6 +37,7 @@ write 6
 read 15
 buf: 57 3c 02 01 09 00 0a ea d6 a6 16 00 4b 12 00
 ```
+
 |Return Code|Meanning|
 |---|---|
 |57 3c|Fixed header|
@@ -44,6 +59,7 @@ write 22
 read 7
 buf: 57 3c 08 0d 01 00 00
 ```
+
 |Command|Meanning|
 |---|---|
 |57 3E|Fixed header|
@@ -91,9 +107,8 @@ buf: 57 3c 83 64 0d 38 01 ea d6 a6 16 00 4b 12 00 1c 00 1b 00
 |ea d6 a6 16 00 4b 12 00|Data section, the MAC of the first device|
 |1c 00 1b 00|Data section, 1c00 is the temperature, 1b00 is the humidity|
 
-
-
 ## Device accessing
+
 |Function|Pin|Memo|
 |Motor|P1.1, P1.2||
 |DTH11|P1.5||
