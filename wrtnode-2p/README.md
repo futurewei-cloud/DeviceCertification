@@ -79,10 +79,39 @@ read 7
 buf: 57 3c 08 0d 01 00 00
 ```
 
+* Control the motor
+Turn on the motor
+```
+root@LEDE:/bin# ./send 57 3E 08 0D 10 00 ea d6 a6 16 00 4b 12 00 00 FF 06 F9 00 FF 00 FF
+ 57 3e 08 0d 10 00 ffffffde 55 ffffff9a 17 00 4b 12 00 00 ffffffff 06 fffffff9 00 ffffffff 00 ffffffff
+ write 22
+ read 7
+ buf: 57 3c 08 0d 01 00 00
+```
+
+|Command|Meanning|
+|---|---|
+|57 3E|Fixed header|
+|08|Read/Write IO|
+|0d|CID|
+|10|The length of the data|
+|00|Checking data, always be 00 for this testing board|
+|ea d6 a6 16 00 4b 12 00|data section, the MAC of the first device|
+|00 FF 06 F9 00 FF 00 FF|Command to start motor|
+
+Turn off the motor
+```
+root@LEDE:/bin# ./send 57 3E 08 0D 10 00 ea d6 a6 16 00 4b 12 00 00 FF 00 FF 00 FF 00 FF
+ 57 3e 08 0d 10 00 ffffffde 55 ffffff9a 17 00 4b 12 00 00 ffffffff 00 ffffffff 00 ffffffff 00 ffffffff
+ write 22
+ read 7
+ buf: 57 3c 08 0d 01 00 00
+```
+
 * Get output from DTH11
 Send command to DTH11 to ask for data
 ```
-root@LEDE:~# send 57 3E 08 64 10 00 ea d6 a6 16 00 4b 12 00 00 FF 00 FF 00 FF 00 FF
+root@LEDE:~# ./send 57 3E 08 64 10 00 ea d6 a6 16 00 4b 12 00 00 FF 00 FF 00 FF 00 FF
  57 3e 08 64 10 00 ffffffea ffffffd6 ffffffa6 16 00 4b 12 00 00 ffffffff 00 ffffffff 00 ffffffff 00 ffffffff
 write 22
 read 7
