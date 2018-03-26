@@ -1,0 +1,167 @@
+openapi: 3.0.0
+info:
+  description: "The contract to define the wrtnode-2P testing board"
+  version: "0.1.0"
+  title: "WrtNode-2P"
+
+servers:
+  - url: /v1/wrtnode2p
+
+paths:
+  /Alarm/{alarmId}:
+    parameters:
+      - in: path
+        name: alarmId
+        required: true
+        schema:
+          type: string
+        description: String ID of the alarm to get.
+    get:
+      tags:
+      - "Alarm status"
+      summary: "Get the status of the alarm"
+      description: ""
+      operationId: "getAlarmStatus"
+      responses:
+        '200':
+          description: "successful operation"
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/AlarmStatus"
+    post:
+      tags:
+      - "turn On/Off the alarm"
+      summary: "Switch turn On off the alarm"
+      description: "Switch turn On off the alarm"
+      operationId: "setAlarm"
+      requestBody:
+        description: The status you want for this alarm
+        required: true
+        content:
+          text/plain:
+            schema:
+              $ref: "#/components/schemas/AlarmStatus"
+      responses:
+        404:
+          description: "alarm not found"
+          
+  /Motor:
+    get:
+      tags:
+      - "Motor status"
+      summary: "Get the status of the alarm"
+      description: ""
+      operationId: "getMotorStatus"
+      responses:
+        '200':
+          description: "successful operation"
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/MotorStatus"
+    post:
+      tags:
+      - "turn On/Off the motor"
+      summary: "Switch turn On off the motor"
+      description: "Switch turn On off the motor"
+      operationId: "setMotor"
+      requestBody:
+        description: The status you want for this motor
+        required: true
+        content:
+          text/plain:
+            schema:
+              $ref: "#/components/schemas/MotorStatus"
+      responses:
+        404:
+          description: "motor not found"
+
+  /THSensor:          
+    get:
+      tags:
+      - "Temperature and humidity sensor"
+      summary: "Get temperature and humidity"
+      description: "Get temperature and humidity"
+      operationId: "getTH"
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TemperatureHumidity"
+    post:
+      tags:
+      - "turn On/Off all lights"
+      summary: "Switch turn On off all the lights"
+      description: ""
+      operationId: "controlLights"
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: boolean
+      responses:
+        404:
+          description: "light not found"          
+
+  /CoverDetection:
+    post:
+      summary: Subscribe to a cover detection event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CoverCallback"
+              
+      responses:
+        '201':
+          description: Webhook created
+      callbacks: # Callback definition
+        myEvent: # Event name
+          '{$request.body#/callbackUrl}': # The callback URL, Refers to the passed URL
+            post:
+              requestBody: # Contents of the callback message
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      $ref: "#/components/schemas/CoverCallbackEvent"
+              responses: # Expected responses to the callback message
+                '200':
+                  description: Your server returns this code if it accepts the callback
+components:
+    schemas:
+      AlarmStatus:
+        type: "boolean"
+        default: false
+      MotorStatus:
+        type: "boolean"
+        default: false
+      TemperatureHumidity:
+        type: object
+        properties:
+          Temperature:
+            type: integer
+          Humidity:
+            type: integer
+      CoverCallback:
+        type: object
+        properties:
+          callbackUrl: # Callback URL
+            type: string
+            format: uri
+            example: https://myserver.com/send/callback/here
+        required:
+          - callbackUrl
+      CoverCallbackEvent:
+        type: object
+        properties:
+          coverStatus:
+            type: string
+        required:
+          - coverStatus
