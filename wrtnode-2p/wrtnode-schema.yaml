@@ -91,22 +91,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TemperatureHumidity"
-    post:
-      tags:
-      - "turn On/Off all lights"
-      summary: "Switch turn On off all the lights"
-      description: ""
-      operationId: "controlLights"
-      requestBody:
-        description: Optional description in *Markdown*
-        required: true
-        content:
-          text/plain:
-            schema:
-              type: boolean
-      responses:
-        404:
-          description: "light not found"          
 
   /CoverDetection:
     post:
