@@ -65,7 +65,7 @@
     -   Update expected device state for target device, and expect the
     linked device takes action (PUT)
 
-2)  Autonomous on Edge node
+2)  Autonomous on edge node
 
     -   Cover the sensor with finger, the LED is light up. The local
         LDRS states are updated by deviceDriverCover and ControlMotorApp
@@ -79,14 +79,14 @@
     -   In 2), if the target device is located inside different edge
         node, the state update is sent to the other edge node through
         the Service Bus, with central cloud's help. Repeat the test
-        in 2) will cause the remote Motor2 spins.
+        in 2) will cause the remote motor spins.
 
 ## Install/Configure center and edge cloud
 
-> Note: Before all, preparing Config.yaml file in the folder where the
-> commands were launched. Find the sample Config.yaml files from the
+> Note: Before all, preparing config.yaml file in the folder where the
+> commands were launched. Find the sample config.yaml files from the
 > shipped package (git@github.com:/seattle-cloud-lab/EdgeCore.git).
-> For single machine testing purpose: cp EdgeCore/configurations/center/config.local.yaml ServiceBus/config.yaml
+
 
 Sample for center:
 
@@ -94,6 +94,8 @@ Sample for center:
     clusterName: "HuaweiProject1"
     edgeName: "center"
     localTcpPort: 8080
+    metaDBService: "114.115.153.49:8080"
+    databasePath: "database"
  
 Sample for edge:
 
@@ -101,6 +103,11 @@ Sample for edge:
     clusterName: "HuaweiProject1"
     edgeName: "e1"
     localTcpPort: 8080
+    metaDBService: "114.115.153.49:8080"
+    databasePath: "database"
+    
+> Note: For test run on same node, set the localTcpPort and databasePath differently between center and edge to avoid conflicts.
+> You can find respect files here: EdgeCore/configurations/{center | edge}/config.local.yaml, and copy over where the binaries are placed. 
  
 Build (under $GOPATH/src folder): 
 
@@ -111,9 +118,17 @@ Build (under $GOPATH/src folder):
     - git clone git@github.com:/seattle-cloud/syncmeta.git
     
     cd ServiceBus
-    go build server.go
-    go build center.go
-    go build edge.go
+    go build server.go (for central cloud)
+    go build center.go (for central cloud)
+    go build edge.go   (for edge node)
+	 
+	 Note: for compiling 'edge.go', set env correctly first -
+	 Wrtnode:
+	 		export GOARCH=mipsle
+	 		export GOOS=linux
+	 Raspberry Pi 3:
+	 		export GOARCH=arm
+	 		export GOOS=linux
 
 ### 1)  Start etcd server on central cloud
 
@@ -138,7 +153,7 @@ Build (under $GOPATH/src folder):
 | -------- | ------- |
 | Method   | POST    |
 | URL      | <http://114.115.153.49:8080/v1.0/HuaweiProject1/edgecloud/edges/center/metadata/configure?operation=batch>|
-| BODY     | [<br> &nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp; "Key": "Root/System/Configure/Edges/HuaweiProject1/e1/Services/MetadataDB/SyncToLocal",<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Value": [<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "EndKey": "",<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "StartKey": "Root/System/Configure/Public/Common/EdgeList/"<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br> &nbsp;&nbsp;},<br> &nbsp;&nbsp;{<br> &nbsp;&nbsp;&nbsp;&nbsp;"Key": "Root/System/Configure/Edges/HuaweiProject1/e2/Services/MetadataDB/SyncToLocal",<br> &nbsp;&nbsp;&nbsp;&nbsp;"Value": [<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "EndKey": "",<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "StartKey":<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Root/System/Configure/Public/Common/EdgeList/"<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br> &nbsp;&nbsp;&nbsp;&nbsp; ]<br> &nbsp;&nbsp;},<br> &nbsp;&nbsp;{<br> &nbsp;&nbsp;&nbsp;&nbsp;"Key":<br>&nbsp;&nbsp;&nbsp;&nbsp; "Root/System/Configure/Public/Common/EdgeList/HuaweiProject1/e1",<br> &nbsp;&nbsp;&nbsp;&nbsp;"Value": {<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "ClusterID": 1,<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "EdgeID": 2,<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "EdgeName": "e1",<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "ProjectID": "HuaweiProject1"<br> &nbsp;&nbsp;&nbsp;&nbsp;}<br> &nbsp;&nbsp;},<br> &nbsp;&nbsp;{<br> &nbsp;&nbsp;&nbsp;&nbsp;"Key": "Root/System/Configure/Public/Common/EdgeList/HuaweiProject1/e2",<br> &nbsp;&nbsp;&nbsp;&nbsp;"Value": {<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "ClusterID": 1,<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "EdgeID": 3,<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "EdgeName": "e2",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "ProjectID": "HuaweiProject1"<br>&nbsp;&nbsp;&nbsp;&nbsp; }<br>&nbsp;&nbsp; }<br> ]<br> |   
+| BODY     | [<br> &nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp; "Key": "Root/System/Configure/Edges/HuaweiProject1/e1/Services/MetadataDB/SyncToLocal",<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Value": [<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "EndKey": "",<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "StartKey": "Root/System/Configure/Public/Common/EdgeList/"<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br> &nbsp;&nbsp;},<br> &nbsp;&nbsp;{<br> &nbsp;&nbsp;&nbsp;&nbsp;"Key": "Root/System/Configure/Edges/HuaweiProject1/e2/Services/MetadataDB/SyncToLocal",<br> &nbsp;&nbsp;&nbsp;&nbsp;"Value": [<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "EndKey": "",<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "StartKey":<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Root/System/Configure/Public/Common/EdgeList/"<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br> &nbsp;&nbsp;&nbsp;&nbsp; ]<br> &nbsp;&nbsp;},<br> &nbsp;&nbsp;{<br> &nbsp;&nbsp;&nbsp;&nbsp;"Key": "Root/System/Configure/Public/Common/EdgeList/HuaweiProject1/e1",<br> &nbsp;&nbsp;&nbsp;&nbsp;"Value": {<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "ClusterID": 1,<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "EdgeID": 2,<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "EdgeName": "e1",<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "ProjectID": "HuaweiProject1"<br> &nbsp;&nbsp;&nbsp;&nbsp;}<br> &nbsp;&nbsp;},<br> &nbsp;&nbsp;{<br> &nbsp;&nbsp;&nbsp;&nbsp;"Key": "Root/System/Configure/Public/Common/EdgeList/HuaweiProject1/e2",<br> &nbsp;&nbsp;&nbsp;&nbsp;"Value": {<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "ClusterID": 1,<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "EdgeID": 3,<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "EdgeName": "e2",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "ProjectID": "HuaweiProject1"<br>&nbsp;&nbsp;&nbsp;&nbsp; }<br>&nbsp;&nbsp; }<br> ]<br> |   
 | RESPONSE | 200 OK "Succeed"<br>200 OK "Key already exist" -- etcd error message<br>4xx ERROR HTTP error messages     |
 
 ### 6)  Or add new configurations (POST
