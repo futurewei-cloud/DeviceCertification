@@ -136,6 +136,7 @@ Build (under $GOPATH/src folder):
 
 ### 2)  Load configuration to etcd server (this is to boot strap central meta DB servie)
 
+    export ETCDCTL_API=3
     etcdctl put Root/System/Configure/Public/Common/EdgeList/HuaweiProject1/center '{"Key": "Root/System/Configure/Public/Common/EdgeList/HuaweiProject1/center", "Revision": 1, "Value": { "ClusterID": 1, "EdgeID": 1, "EdgeName": "center", "ProjectID": "HuaweiProject1" } }'
 
 ### 3)  Start service bus server
