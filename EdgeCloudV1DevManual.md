@@ -111,11 +111,11 @@ Sample for edge:
  
 Build (under $GOPATH/src folder): 
 
-    - git clone git@github.com:/seattle-cloud/centralmetadatadbservice.git
-    - git clone git@github.com:/seattle-cloud/LightweightETCD.git -> github.com/coreos/etcd
-    - git clone git@github.com:/seattle-cloud/ServiceBus.git
-    - git clone git@github.com:/seattle-cloud/LogicalDeviceRepository -> ldrs
-    - git clone git@github.com:/seattle-cloud/syncmeta.git
+    - git clone git@github.com:/seattle-cloud-lab/centralmetadatadbservice.git
+    - git clone git@github.com:/seattle-cloud-lab/LightweightETCD.git -> github.com/coreos/etcd
+    - git clone git@github.com:/seattle-cloud-lab/ServiceBus.git
+    - git clone git@github.com:/seattle-cloud-lab/LogicalDeviceRepository -> ldrs
+    - git clone git@github.com:/seattle-cloud-lab/syncmeta.git
     
     cd ServiceBus
     go build server.go (for central cloud)
