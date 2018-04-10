@@ -117,10 +117,10 @@ Build (under $GOPATH/src folder):
     - git clone git@github.com:/seattle-cloud-lab/LogicalDeviceRepository -> ldrs
     - git clone git@github.com:/seattle-cloud-lab/syncmeta.git
     
-    cd ServiceBus
-    go build server.go (for central cloud)
-    go build center.go (for central cloud)
-    go build edge.go   (for edge node)
+    cd ServiceBus/cmd
+    cd centerserver & go build server.go (for central cloud)
+    cd centralmetadataservice & go build center.go (for central cloud)
+    cd edge & go build edge.go   (for edge node)
 	 
 	 Note: for compiling 'edge.go', set env correctly first -
 	 Wrtnode:
@@ -128,9 +128,10 @@ Build (under $GOPATH/src folder):
 	 		export GOOS=linux
 	 Raspberry Pi 3:
 	 		export GOARCH=arm
+	 		export GOARM=7
 	 		export GOOS=linux
 
-### 1)  Start etcd server on central cloud
+### 1)  Start etcd server on central cloud node
 
     ./etcd
 
@@ -141,11 +142,11 @@ Build (under $GOPATH/src folder):
 
 ### 3)  Start service bus server
 
-    ./server
+    cmd/centerserver/server
 
 ### 4)  Start central MetadataDB service
 
-    ./center
+    cmd/centralmetaservice/center
 
 
 ### 5)  Create initial configurations (POST <http://{hostname}:{port}/v1.0/{ProjectID}/edgecloud/edges/center/metadata/configure?operation=batch>)
@@ -170,7 +171,7 @@ Build (under $GOPATH/src folder):
 
 ### 7)  Start edge service
 
-    ./edge
+    cmd/edge/edge
     
 ## Manage local logic edge devices from cloud
 
