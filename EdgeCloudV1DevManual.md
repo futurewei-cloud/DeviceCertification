@@ -96,6 +96,7 @@ Sample for center:
     localTcpPort: 8080
     metaDBService: "114.115.153.49:8080"
     databasePath: "database"
+    retryInterval: 100
  
 Sample for edge:
 
@@ -105,6 +106,7 @@ Sample for edge:
     localTcpPort: 8080
     metaDBService: "114.115.153.49:8080"
     databasePath: "database"
+    retryInterval: 100
     
 > Note: For test run on same node, set the localTcpPort and databasePath differently between center and edge to avoid conflicts.
 > You can find respect files here: EdgeCore/configurations/{center | edge}/config.local.yaml, and copy over where the binaries are placed. 
