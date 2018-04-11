@@ -143,7 +143,7 @@ Build (under $GOPATH/src folder):
     $ export ETCDCTL_API=3
     $ etcdctl put Root/System/Configure/Public/Common/EdgeList/HuaweiProject1/center '{"Key": "Root/System/Configure/Public/Common/EdgeList/HuaweiProject1/center", "Revision": 1, "Value": { "ClusterID": 1, "EdgeID": 1, "EdgeName": "center", "ProjectID": "HuaweiProject1" } }'
     OK
-    $ etcdctl put Root/System/Configure/Public/Common/EdgeList/HuaweiProject1/center
+    $ etcdctl get Root/System/Configure/Public/Common/EdgeList/HuaweiProject1/center
     Root/System/Configure/Public/Common/EdgeList/HuaweiProject1/center
     {"Key": "Root/System/Configure/Public/Common/EdgeList/HuaweiProject1/center", "Revision": 1, "Value": { "ClusterID": 1, "EdgeID": 1, "EdgeName": "center", "ProjectID": "HuaweiProject1" } }
 
