@@ -8,8 +8,10 @@ import (
 	"bytes"
 	"time"
 	"bufio"
+	"os"
+
 	//"raspberrypi3/devicedrivers/light"
-	"wrtnodedriver"
+	"DeviceCertification/wrtnode-2p/demoboard/wrtnodedriver"
 )
 
 
@@ -26,17 +28,22 @@ func main() {
 	var lastStatus1 uint64
 	var lastStatus2 uint64
 
+	args := os.Args
+	if len(args) < 1 {
+		fmt.Printf("usage: ./applicatioin [source edge name (e3|e4)]")
+	}
+
 	wrtnodedriver.InitDevice()
 
 	// paralelly run target monitor
-	go target()
+	go target(args[0])
 
 	// logics for source monitor
 	status = 0x0100
 	lastStatus1 = 0
 	lastStatus2 = 0
 
-	target := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/e3/ldrs/actual/?update=batch"
+	source := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/" + args[0] + "/ldrs/actual/?update=batch"
 
 	for {
 		var r int64
@@ -97,7 +104,7 @@ func main() {
 			continue
 		}
 
-// update all to target
+// update all to source
 		b, err := json.Marshal(kvs)
 		if err != nil {
 			fmt.Println(err)
@@ -105,7 +112,7 @@ func main() {
 		}
 
 		fmt.Printf("Body: %+v\n", kvs)
-		PostCoverObj(b, target)
+		PostCoverObj(b, source)
 		time.Sleep(300 * time.Millisecond)
 	}
 
@@ -147,9 +154,9 @@ type Response struct {
 	Content []Contents
 }
 
-func target()  {
+func target(edgeName string)  {
 
-		url := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/e3/ldrs/expected/demoboard/motor?watch=true&recursive=true"
+		url := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/" + edgeName + "/ldrs/expected/demoboard/motor?watch=true&recursive=true"
 		fmt.Println(url)
 		req, _ := http.NewRequest("GET", url, nil)
 		req.Header.Set("Connection", "close")
@@ -168,19 +175,26 @@ func target()  {
 				continue
 			}
 			for _, c := range w.Content {
+				var motorNumber int
+
 				fmt.Printf("In target loop ...\n")
+				if c.Key == "motor1" {
+					motorNumber = 0
+				} else {
+					motorNumber = 1
+				}
 				status := c.Value.(float64)
 				fmt.Printf("====> Status: %v\n", status)
 				if status > 0 {
-					//wrtnodedriver.SetGPIO(0, "00 10 00 00", 1)- alarm
+					//wrtnodedriver.SetGPIO(motorNumber, "00 10 00 00", 1)- alarm
 					// motor:
 					fmt.Printf("====> Calling SetGPIO on from target\n")
-					wrtnodedriver.SetGPIO(0, "00 06 00 00", 1)
+					wrtnodedriver.SetGPIO(motorNumber, "00 06 00 00", 1)
 				} else {
-					//wrtnodedriver.SetGPIO(0, "00 10 00 00", 0)- alarm
+					//wrtnodedriver.SetGPIO(motorNumber, "00 10 00 00", 0)- alarm
 					// motor:
 					fmt.Printf("====> Calling SetGPIO off from target\n")
-					wrtnodedriver.SetGPIO(0, "00 06 00 00", 0)
+					wrtnodedriver.SetGPIO(motorNumber, "00 06 00 00", 0)
 				}
 
 			}

@@ -1,4 +1,4 @@
-The vendor/src/wrtnodedriver supports multiple demoboards for single Wrtnode Edge Box. Currently the example of demomapper.go and demoapp.go are only supports 2 demoboards and limited sensor/device functions. 
+The wrtnodedriver supports multiple demoboards for single Wrtnode Edge Box. Currently the example of demomapper.go and demoapp.go are only supports 2 demoboards and limited sensor/device functions. 
 Make sure the vendor path is on your GOPATH list for compilation
 Please create schemas with following contents(note: revision, createTime, modifiedTime are system generated):
 

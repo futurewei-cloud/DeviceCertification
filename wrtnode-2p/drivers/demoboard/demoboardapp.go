@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"strings"
 	"log"
-	//"bufio"
 	"io/ioutil"
 	"bytes"
+	"os"
 )
 
 
@@ -36,39 +36,32 @@ type Schema struct {
 
 func main() {
 
-	source := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/e3/ldrs/actual/demoboard/coversensor?watch=true&recursive=true"
-	target := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/e3/ldrs/expected/?update=batch"
-	//req, _ := http.NewRequest("GET", "http://localhost:8080/Futurewei4/RainerCore/1.0.0/logicaldevices/watch/abc", nil)
+	args := os.Args
+	if len(args) < 3 {
+		fmt.Printf("usage: ./applicatioin [source edge name (e3|e4)] [target edge name (e3|e4)] [target device name (motor1|motor2)]")
+	}
+
+	source := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/" + args[0] + "/ldrs/actual/demoboard/coversensor?watch=true&recursive=true"
+	target := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/" + args[1] + "/ldrs/expected/?update=batch"
 	req, _ := http.NewRequest("GET", source, nil)
 	resp, _ := http.DefaultClient.Do(req)
 	defer resp.Body.Close()
-	fmt.Println("start test")
-
+	fmt.Println("start application")
 
 	for {
-		//reader := bufio.NewReader(resp.Body)
-		//line, err := reader.ReadBytes('\n')
-		//b, err := ioutil.ReadAll(resp.Body)
-		//reader.Reset(resp.Body)
-		//if err != nil {
-		//	fmt.Println(err)
-		//	continue
-		//}
 		w := WatchResponse{}
 		err := json.NewDecoder(resp.Body).Decode(&w)
-		//err = json.Unmarshal(b, &w)
 		if err != nil{
 			fmt.Println(err)
 			continue
 		}
-		//log.Println(string(b))
 		kvs := []Schema{}
 		fmt.Printf(" ---> len(w.Content): %d\n", len(w.Content))
 		fmt.Printf(" ===> w.Content: %+v\n", w.Content)
 		for _, c := range w.Content {
 			fmt.Printf(" ===> c.Value: %v\n", c.Value)
 			kv := Schema{
-				Key: "demoboard/motor1",
+				Key: "demoboard/" + args[2],
 				Value: c.Value,
 			}
 			fmt.Println("test test")
