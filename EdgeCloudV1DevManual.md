@@ -113,17 +113,59 @@ Sample for edge:
  
 Build (under $GOPATH/src folder): 
 
-    - git clone git@github.com:/seattle-cloud-lab/centralmetadatadbservice.git
     - git clone git@github.com:/seattle-cloud-lab/LightweightETCD.git -> github.com/coreos/etcd
-    - git clone git@github.com:/seattle-cloud-lab/ServiceBus.git
-    - git clone git@github.com:/seattle-cloud-lab/LogicalDeviceRepository -> ldrs
+    	Resolve dependencies:
+		go get github.com/coreos/bbolt
+		go get github.com/coreos/go-semver/semver
+		go get github.com/coreos/pkg/capnslog
+		go get github.com/dgrijalva/jwt-go
+		go get github.com/dustin/go-humanize
+		go get github.com/gogo/protobuf/gogoproto
+		go get github.com/gogo/protobuf/proto
+		go get github.com/golang/glog
+		go get github.com/golang/protobuf/proto
+		go get github.com/google/btree
+		go get github.com/grpc-ecosystem/go-grpc-prometheus
+		go get github.com/jonboulle/clockwork
+		go get github.com/juju/loggo
+		go get github.com/prometheus/client_golang/prometheus
+		go get github.com/ugorji/go/codec
+		go get github.com/xiang90/probing
+		go get golang.org/x/crypto/bcrypt
+		go get golang.org/x/net/context
+		go get golang.org/x/time/rate
+		go get google.golang.org/grpc
+		go get google.golang.org/grpc/codes
+		go get google.golang.org/grpc/connectivity
+		go get google.golang.org/grpc/credentials
+		go get google.golang.org/grpc/grpclog
+		go get google.golang.org/grpc/health
+		go get google.golang.org/grpc/health/grpc_health_v1
+		go get google.golang.org/grpc/keepalive
+		go get google.golang.org/grpc/metadata
+		go get google.golang.org/grpc/peer
+		go get google.golang.org/grpc/status
+		go get gopkg.in/yaml.v2
+		go get github.com/emicklei/go-restful
+		go get github.com/spf13/pflag
+
+    - git clone git@github.com:/seattle-cloud-lab/centralmetadatadbservice.git
+        No need build this project, it is providing library for service-bus project
+    - git clone git@github.com:/seattle-cloud-lab/ldrs
+        No need build this project, it is providing library for service-bus project
     - git clone git@github.com:/seattle-cloud-lab/syncmeta.git
-    
-    cd ServiceBus/cmd
-    cd centerserver & go build server.go (for central cloud)
-    cd centralmetadataservice & go build center.go (for central cloud)
-    cd edge & go build edge.go   (for edge node)
-	 
+        No need build this project, it is providing library for service-bus project
+    - git clone git@github.com:/seattle-cloud-lab/service-bus.git
+    	Resolve dependencies:
+		go get gopkg.in/yaml.v2
+		go get github.com/emicklei/go-restful
+		go get github.com/spf13/pflag
+		and the other projects: etcd, centralmetadatadbservice, ldrs, syncmeta
+        cd service-bus/cmd
+        cd centerserver & go build server.go (for central cloud)
+        cd centralmetadataservice & go build center.go (for central cloud)
+        cd edge & go build edge.go   (for edge nodes)
+ 
 	 Note: for compiling 'edge.go', set env correctly first -
 	 Wrtnode:
 	 		export GOARCH=mipsle
@@ -135,7 +177,8 @@ Build (under $GOPATH/src folder):
 
 ### 1)  Start etcd server on central cloud node
 
-    ./etcd
+    - This is not the lightweight etcd package. Should download the standard etcd binaries package from
+      https://github.com/coreos/etcd/releases/, extract files and run ./etcd from there.
 
 ### 2)  Load configuration to etcd server (this is to boot strap central meta DB servie)
 
