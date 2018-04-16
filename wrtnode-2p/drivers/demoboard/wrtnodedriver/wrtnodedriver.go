@@ -28,13 +28,20 @@ func hexArrayToInt64(items []string) (uint64, error) {
 	mac = 0
 	//fmt.Printf("length of items: %d\n", len(items))
 	//fmt.Printf("items: %+v\n", items)
+	cnt := 0
 	for _, str := range items {
+		fmt.Printf("item[%d]: %+v\n", cnt, str)
 		cur, err := strconv.ParseUint("0x" + str, 0, 8)
 		if err != nil {
 			return 0, err
 		}
 		mac = mac << 8 + cur
+		cnt = cnt + 1
 	}
+	if cnt < 4 || (cnt > 4 && cnt != 8) {
+		return 0, fmt.Errorf("Input string is malformed")
+	}
+
 	return mac, nil
 }
 
@@ -104,6 +111,10 @@ func InitDevice() error {
 }
 
 func SetGPIO(deviceIndex int, cmdArgs string, onOff int) error {
+	fmt.Printf("====> index: %d\n", deviceIndex)
+	fmt.Printf("====> m[0]: %+v\n", macsString[0])
+	fmt.Printf("====> m[1]: %+v\n", macsString[1])
+	fmt.Printf("====> m[index]: %+v\n", macsString[deviceIndex])
 	// first, check against latest input
 	cmdArgsInt, err := hexArrayToInt64(strings.Split(cmdArgs, " "))
 	if err != nil {
@@ -153,6 +164,7 @@ func readGPIO(deviceIndex int) error {
 	count = 2
 
 	for count > 1 {
+		time.Sleep(time.Second)
 		cmd := exec.Command("/bin/send", "57", "3E", "83", "01", "00", "00")
 		printCommand(cmd)
 
@@ -165,6 +177,13 @@ func readGPIO(deviceIndex int) error {
 		}
 
 		out = strings.Split(cmdOutput.String(), "\n")
+
+		out2 := strings.Split(out[2], " ");
+		if out2[1] != "19" {
+			os.Stderr.WriteString(fmt.Sprintf("==> Error: return state string: %s\n", out[3]))
+			return fmt.Errorf("response mismatched")
+		}
+
 		ret_prefix := "buf: "
 		startIndex := strings.Index(out[3], ret_prefix)
 		if startIndex != 0 {
@@ -178,19 +197,19 @@ func readGPIO(deviceIndex int) error {
 			os.Stderr.WriteString(fmt.Sprintf("==> Error: %s\n", err.Error()))
 			return err
 		}
-		fmt.Printf("==> Count: %v\n%d\n", out[3], cnt)
+		fmt.Printf("==> Count: %v\n%d\n", out3, cnt)
 		count = int(cnt)
 		if count == 0 {
 			break
 		}
 
 		// get mac address from response
-		curMac, err := hexArrayToInt64(out3[7:15:15])
+		curMac, err := hexArrayToInt64(out3[7:15])
 		if err != nil {
 			os.Stderr.WriteString(fmt.Sprintf("==> Error: %s\n", err.Error()))
 			return err
 		}
-		state, err := hexArrayToInt64(out3[15:19:19])
+		state, err := hexArrayToInt64(out3[15:19])
 		if err != nil {
 			os.Stderr.WriteString(fmt.Sprintf("==> Error: %s\n", err.Error()))
 			return err

@@ -11,7 +11,7 @@ import (
 	"os"
 
 	//"raspberrypi3/devicedrivers/light"
-	"DeviceCertification/wrtnode-2p/demoboard/wrtnodedriver"
+	"DeviceCertification/wrtnode-2p/drivers/demoboard/wrtnodedriver"
 )
 
 
@@ -29,26 +29,32 @@ func main() {
 	var lastStatus2 uint64
 
 	args := os.Args
-	if len(args) < 1 {
-		fmt.Printf("usage: ./applicatioin [source edge name (e3|e4)]")
+	if len(args) < 3 {
+		fmt.Printf("usage: ./demoboardmapper [source edge name (e3|e4)] [source|target]\n")
+		return
 	}
 
 	wrtnodedriver.InitDevice()
 
 	// paralelly run target monitor
-	go target(args[0])
+	if args[2] == "target" {
+		target(args[1])
+		return
+	}
 
 	// logics for source monitor
 	status = 0x0100
 	lastStatus1 = 0
 	lastStatus2 = 0
 
-	source := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/" + args[0] + "/ldrs/actual/?update=batch"
+	source := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/" + args[1] + "/ldrs/actual/?update=batch"
 
 	for {
 		var r int64
 		var kvs []schema
 		updated := 0
+
+		time.Sleep(time.Second)
 // for sensor 1
 		err1 := wrtnodedriver.SetGPIO(0, "00 00 01 00", 1)
 		if err1 != nil {
@@ -67,7 +73,7 @@ func main() {
 
 		if lastStatus1 != status {
 			kv1 := schema{
-				Key: "demoboard/coversensor1",
+				Key: "demoboard/cover1",
 				Value: r,
 			}
 			kvs = append(kvs, kv1)
@@ -91,7 +97,7 @@ func main() {
 		}
 		if lastStatus2 != status {
 			kv2 := schema{
-				Key: "demoboard/coversensor2",
+				Key: "demoboard/cover2",
 				Value: r,
 			}
 			kvs = append(kvs, kv2)
@@ -99,12 +105,12 @@ func main() {
 			updated = 1
 		}
 
+// update all to source
+
 		if updated == 0 {
-			time.Sleep(300 * time.Millisecond)
 			continue
 		}
 
-// update all to source
 		b, err := json.Marshal(kvs)
 		if err != nil {
 			fmt.Println(err)
@@ -113,7 +119,6 @@ func main() {
 
 		fmt.Printf("Body: %+v\n", kvs)
 		PostCoverObj(b, source)
-		time.Sleep(300 * time.Millisecond)
 	}
 
 }
@@ -156,49 +161,51 @@ type Response struct {
 
 func target(edgeName string)  {
 
-		url := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/" + edgeName + "/ldrs/expected/demoboard/motor?watch=true&recursive=true"
-		fmt.Println(url)
-		req, _ := http.NewRequest("GET", url, nil)
-		req.Header.Set("Connection", "close")
-		resp, _ := http.DefaultClient.Do(req)
-		fmt.Println("start test")
-		//buf := bytes.NewBuffer(make([]byte, 0, 10000))
-		//go io.Copy(buf, resp.Body)
-		reader := bufio.NewReader(resp.Body)
-		reader.ReadBytes('}')
-		for {
-			line, _ := reader.ReadBytes('\n')
-			w := Response{}
-			err :=json.Unmarshal(line, &w)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			for _, c := range w.Content {
-				var motorNumber int
-
-				fmt.Printf("In target loop ...\n")
-				if c.Key == "motor1" {
-					motorNumber = 0
-				} else {
-					motorNumber = 1
-				}
-				status := c.Value.(float64)
-				fmt.Printf("====> Status: %v\n", status)
-				if status > 0 {
-					//wrtnodedriver.SetGPIO(motorNumber, "00 10 00 00", 1)- alarm
-					// motor:
-					fmt.Printf("====> Calling SetGPIO on from target\n")
-					wrtnodedriver.SetGPIO(motorNumber, "00 06 00 00", 1)
-				} else {
-					//wrtnodedriver.SetGPIO(motorNumber, "00 10 00 00", 0)- alarm
-					// motor:
-					fmt.Printf("====> Calling SetGPIO off from target\n")
-					wrtnodedriver.SetGPIO(motorNumber, "00 06 00 00", 0)
-				}
-
-			}
-			fmt.Printf("Got one line: %s\n", string(line))
+	url := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/" + edgeName + "/ldrs/expected/demoboard/motor?watch=true&recursive=true"
+	fmt.Println(url)
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Connection", "close")
+	resp, _ := http.DefaultClient.Do(req)
+	fmt.Println("start test")
+	//buf := bytes.NewBuffer(make([]byte, 0, 10000))
+	//go io.Copy(buf, resp.Body)
+	reader := bufio.NewReader(resp.Body)
+	reader.ReadBytes('}')
+	for {
+		line, _ := reader.ReadBytes('\n')
+		w := Response{}
+		err :=json.Unmarshal(line, &w)
+		if err != nil {
+			fmt.Printf("Read error: '%s'\n", line)
+			fmt.Println(err)
+			time.Sleep(time.Second)
+			continue
 		}
+		for _, c := range w.Content {
+			var motorNumber int
+
+			fmt.Printf("In target loop ...\n")
+			if c.Key == "demoboard/motor1" {
+				motorNumber = 0
+			} else {
+				motorNumber = 1
+			}
+			status := c.Value.(float64)
+			fmt.Printf("====> Status: %v\n", status)
+			if status > 0 {
+				//wrtnodedriver.SetGPIO(motorNumber, "00 10 00 00", 1)- alarm
+				// motor:
+				fmt.Printf("====> Calling SetGPIO on from target\n")
+				wrtnodedriver.SetGPIO(motorNumber, "00 06 00 00", 1)
+			} else {
+				//wrtnodedriver.SetGPIO(motorNumber, "00 10 00 00", 0)- alarm
+				// motor:
+				fmt.Printf("====> Calling SetGPIO off from target\n")
+				wrtnodedriver.SetGPIO(motorNumber, "00 06 00 00", 0)
+			}
+
+		}
+		fmt.Printf("Got one line: %s\n", string(line))
+	}
 
 }

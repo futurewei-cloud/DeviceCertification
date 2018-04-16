@@ -38,11 +38,12 @@ func main() {
 
 	args := os.Args
 	if len(args) < 3 {
-		fmt.Printf("usage: ./applicatioin [source edge name (e3|e4)] [target edge name (e3|e4)] [target device name (motor1|motor2)]")
+		fmt.Printf("usage: ./demoboardapp [source edge name (e3|e4)] [target edge name (e3|e4)] [target device name (motor1|motor2)]")
+		return
 	}
 
-	source := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/" + args[0] + "/ldrs/actual/demoboard/coversensor?watch=true&recursive=true"
-	target := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/" + args[1] + "/ldrs/expected/?update=batch"
+	source := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/" + args[1] + "/ldrs/actual/demoboard/cover?watch=true&recursive=true"
+	target := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/" + args[2] + "/ldrs/expected/?update=batch"
 	req, _ := http.NewRequest("GET", source, nil)
 	resp, _ := http.DefaultClient.Do(req)
 	defer resp.Body.Close()
@@ -52,7 +53,7 @@ func main() {
 		w := WatchResponse{}
 		err := json.NewDecoder(resp.Body).Decode(&w)
 		if err != nil{
-			fmt.Println(err)
+			fmt.Println("Request '%s' returned with '%v'", source, err)
 			continue
 		}
 		kvs := []Schema{}
@@ -61,7 +62,7 @@ func main() {
 		for _, c := range w.Content {
 			fmt.Printf(" ===> c.Value: %v\n", c.Value)
 			kv := Schema{
-				Key: "demoboard/" + args[2],
+				Key: "demoboard/" + args[3],
 				Value: c.Value,
 			}
 			fmt.Println("test test")
