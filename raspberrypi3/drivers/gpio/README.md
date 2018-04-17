@@ -39,3 +39,7 @@ Before running build, please set environment variables:
 	./lightmapper
 	./switchmapper
 	./application
+
+## 4. wire the switch and light with bread board for the sample drivers:
+![](../../../images/RaspBerryPiWiringExample.png)
+
