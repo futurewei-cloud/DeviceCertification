@@ -11,6 +11,8 @@ Before running build, please set environment variables:
 	export GOARCH=arm
 	export GOARM=7
 
+	go get github.com/stianeikeland/go-rpio
+	
 	go build lightmapper.go
 	go build switchmapper.go
 	go build application.go
