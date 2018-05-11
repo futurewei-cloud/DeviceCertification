@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"DeviceCertification/raspberrypi3/drivers/gpio/devicedrivers/switchdriver"
 	"time"
+	"runtime"
 )
 
 type schema struct {
@@ -19,17 +20,29 @@ type schema struct {
 }
 
 func main() {
+	fmt.Printf("Start switch mapper ARCH [%s]\n", runtime.GOARCH)
+
 	var status int64
 
 	status = 7
-	target := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/e1/ldrs/actual/?update=batch"
+	var ret int64
+	ret = 1
+	target := "http://localhost:8080/v1.0/p1/edgecloud/edges/e1/ldrs/actual/?update=batch"
 	for {
 		// Switch ReadStatus with readStatus for testing
-		ret := switchdriver.ReadStatus()
-		//ret := readStatus(status)
-		if ret == status {
-			continue
+		if runtime.GOARCH == "amd64" {
+			if ret == 1 {
+				ret = 0
+			} else {
+				ret = 1
+			}
+		} else {
+			ret = switchdriver.ReadStatus()
 		}
+		//ret := readStatus(status)
+		/*if ret == status {
+			continue
+		}*/
 
 		fmt.Println("Status ")
 		status = ret

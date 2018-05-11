@@ -36,8 +36,8 @@ type Schema struct {
 
 func main() {
 
-	source := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/e1/ldrs/actual/switch?watch=true&recursive=true"
-	target := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/e1/ldrs/expected/?update=batch"
+	source := "http://localhost:8080/v1.0/p1/edgecloud/edges/e1/ldrs/actual/switch?watch=true&recursive=true"
+	target := "http://localhost:8080/v1.0/p1/edgecloud/edges/e1/ldrs/expected/?update=batch"
 	req, _ := http.NewRequest("GET", source, nil)
 	resp, _ := http.DefaultClient.Do(req)
 	defer resp.Body.Close()

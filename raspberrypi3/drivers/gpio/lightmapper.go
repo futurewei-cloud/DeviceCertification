@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"bufio"
 	"encoding/json"
+	"runtime"
 	"DeviceCertification/raspberrypi3/drivers/gpio/devicedrivers/lightdriver"
 )
 
@@ -24,36 +24,42 @@ type WatchResponse struct {
 }
 
 func main()  {
+	fmt.Printf("Start light mapper ARCH [%s]\n", runtime.GOARCH)
 
-	url := "http://localhost:8080/v1.0/HuaweiProject1/edgecloud/edges/e1/ldrs/expected/light?watch=true&recursive=true"
-	fmt.Println(url)
+	url := "http://localhost:8080/v1.0/p1/edgecloud/edges/e1/ldrs/expected/light?watch=true&recursive=true"
 	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Connection", "close")
 	resp, _ := http.DefaultClient.Do(req)
-	fmt.Println("start light mapper")
-	reader := bufio.NewReader(resp.Body)
-	reader.ReadBytes('}')
+	defer resp.Body.Close()
+
 	for {
-		line, _ := reader.ReadBytes('\n')
+		// Get json state from switch
 		w := WatchResponse{}
-		err :=json.Unmarshal(line, &w)
-		if err != nil {
+		err := json.NewDecoder(resp.Body).Decode(&w)
+		if err != nil{
 			fmt.Println(err)
 			continue
 		}
+		fmt.Println(len(w.Content))
+		// Create json state for light
 		for _, c := range w.Content {
 			status := c.Value.(float64)
 			fmt.Println(status)
-			if status > 0 {
-				lightdriver.TurnON()
-				fmt.Println("Light turned on")
-			} else {
-				lightdriver.TurnOff()
-				fmt.Println("Light turned off")
-			}
 
+			if runtime.GOARCH == "amd64" {
+				if status > 0 {
+					fmt.Println("Light turned on")
+				} else {
+					fmt.Println("Light turned off")
+				}
+			} else {
+				if status > 0 {
+					lightdriver.TurnON()
+				} else {
+					lightdriver.TurnOff()
+				}
+			}
 		}
-		fmt.Println(string(line))
+
 	}
 
 }
