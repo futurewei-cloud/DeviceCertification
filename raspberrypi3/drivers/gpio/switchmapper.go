@@ -40,9 +40,9 @@ func main() {
 			ret = switchdriver.ReadStatus()
 		}
 		//ret := readStatus(status)
-		/*if ret == status {
+		if ret == status {
 			continue
-		}*/
+		}
 
 		fmt.Println("Status ")
 		status = ret
